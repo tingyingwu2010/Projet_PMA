@@ -1,4 +1,4 @@
-path = "Falkenauer_u120_03.txt"
+
 using DelimitedFiles
 
 
