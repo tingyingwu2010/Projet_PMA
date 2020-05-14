@@ -8,9 +8,6 @@ function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
     # initialization of item_bin
     # every bin have a vector of the number of items which are in the bin
     item_bin = Array{Array}(undef, numitem)
-    for j in 1 : numitem
-        item_bin[j] = []
-    end
     # pattern that alpha is not integer
     column = Array{Array}(undef, numitem)
 
@@ -26,31 +23,33 @@ function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
     end
 
     weight_bin = weight_bin[1:bin]
-    # All the index of the item which is not properly placed
+    item_bin = item_bin[1:bin]
 
+    # All the index of the item which is not properly placed
+    S = sum(column)
     index = []
     for i in 1:numitem
-        if(sum(column)[i] != 0)
+        if(S[i] != 0)
             push!(index, i)
         end
     end
 
     # We can try to find if there is a bin can pack these remaining items
-    delete = []
-    for i in 1:length(index)
-        for j in 1:bin
-            if(weight[index[i]]+weight_bin[j]<1)
-                for p in item_bin[j]
-                    if(!(index[i],p,0) in cond & !(p,index[i],0) in cond)
-                        push!(delete, i)
-                        push!(item_bin[j], index[i])
-                        weight_bin[j] = weight[index[i]]+weight_bin[j]
-                    end
-                end
-            end
-        end
-    end
-    deleteat!(index,delete)
+    #delete = []
+    #for i in 1:length(index)
+    #    for j in 1:bin
+    #        if(weight[index[i]]+weight_bin[j]<1)
+    #            for p in item_bin[j]
+    #                if(!(index[i],p,0) in cond & !(p,index[i],0) in cond)
+    #                    push!(delete, i)
+    #                    push!(item_bin[j], index[i])
+    #                    weight_bin[j] = weight[index[i]]+weight_bin[j]
+    #                end
+    #            end
+    #        end
+    #    end
+    #end
+    #deleteat!(index,delete)
 
     nbbin,bin_item,weight_bin = newbin_process(numitem,weight,index,cond)
 
