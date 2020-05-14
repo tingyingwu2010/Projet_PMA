@@ -66,7 +66,7 @@ function newbin_process(numitem,weight,new_index,cond)
     for p in 1:nbbin
         if weight_bin[p] > 1
             print("no possible result")
-            return 0, []
+            return 0, [], []
         end
     end
 

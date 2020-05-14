@@ -53,6 +53,11 @@ function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
 
     nbbin,bin_item,weight_bin = newbin_process(numitem,weight,index,cond)
 
+    if nbbin == 0
+        print("no possible result")
+        return 0, []
+    end
+
     item = Array{Array}(undef, (nbbin+bin))
     for j in 1 : (nbbin+bin)
         item[j] = zeros(1, numitem)
@@ -63,7 +68,7 @@ function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
     end
 
     for i in 1:length(item_bin)
-        for j in 1:length(item_bin[i])
+        for j in item_bin[i]
             item[i][j] = 1
         end
     end
