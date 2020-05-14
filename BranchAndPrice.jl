@@ -1,4 +1,3 @@
-using JuMP, Gurobi
 
 function bap(capacity,numitem,weight)
     #initialization
@@ -13,12 +12,13 @@ function bap(capacity,numitem,weight)
     end
     uppper = Inf
     lower = -Inf
-    node_tree=[]
+    master_tree=[]
+    pricing_tree=[]
     while true
         #column = node_tree[-1]
         sp_obj = -100
         while true
-            alpha, master, cons= master(pattern_pool, numitem)
+            alpha, master, cons= RDWLP(pattern_pool, numitem)
             lower = JuMP.objective_value.(master)
             d = JuMP.dual.(cons)
             y, sp_obj = pricing(d, numitem, weight)
@@ -39,21 +39,22 @@ function bap(capacity,numitem,weight)
         end
         #update upperbound
         if flag
-            alpha_opt = alpha
+            alpha_opt = copy(alpha)
             if lower>upper
                 uppper = lower
             end
         end
-
+        # branch
         if uppper>lower && !flag               # solution infeasible??
             i,j = search_fraction(alpha, numitem)
-
+            new_master = copy(master)
+            new_pricing = copy
         end
 
     end
 
 end
-
+# pick up the fractional items that have largest total weight
 function search_fraction(fraction_pattern, numitem)
     for i in numitem:-1:1
         for j in numitem:-1:1
