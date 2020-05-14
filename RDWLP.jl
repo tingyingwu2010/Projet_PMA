@@ -1,13 +1,11 @@
-function master(columns, T)
+function RDWLP(columns, T)
     println("-------------solve RDWLP-----------------")
     n = size(columns)
     master=Model(with_optimizer(Gurobi.Optimizer,OutputFlag = 0, InfUnbdInfo = 1))
 
     @variable(master, alpha[1:n] >= 0,  binary = false)
-    for i in 1:T
-        @constraint(master, arc_s2, sum(alpha[i]*pattern[i] = 1 for pattern in columns)
-        end
+    item_cons = @constraint(master, item_cons[i in 1:T], sum(alpha[i]*pattern[i] for pattern in columns) ==1)
     @objective(master, min, sum(alpha))
-    z = optimize!(dsp)
-    return alpha, master, z
+    optimize!(master)
+    return alpha, master, item_cons
 end
