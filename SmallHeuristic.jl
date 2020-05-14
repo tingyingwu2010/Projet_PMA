@@ -27,8 +27,9 @@ function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
 
     weight_bin = weight_bin[1:bin]
     # All the index of the item which is not properly placed
+
     index = []
-    for i in 1:length(alpha)
+    for i in 1:numitem
         if(sum(column)[i] != 0)
             push!(index, i)
         end
@@ -42,6 +43,7 @@ function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
                 for p in item_bin[j]
                     if(!(index[i],p,0) in cond & !(p,index[i],0) in cond)
                         push!(delete, i)
+                        push!(item_bin[j], index[i])
                         weight_bin[j] = weight[index[i]]+weight_bin[j]
                     end
                 end
@@ -50,15 +52,25 @@ function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
     end
     deleteat!(index,delete)
 
+    nbbin,bin_item,weight_bin = newbin_process(numitem,weight,index,cond)
 
-    new_weight = weight[index]
-
-    bin_num, bin_item = SmallHeuristic_sub(length(new_weight), numitem, new_weight, cond)
-
-    bin = bin + bin_num
-    for j in length(bin_item)
-        push!(column, bin_item[j])
+    item = Array{Array}(undef, (nbbin+bin))
+    for j in 1 : (nbbin+bin)
+        item[j] = zeros(1, numitem)
     end
 
-    return bin, column
+    for i in 1:nbbin
+        push!(item_bin,bin_item[i])
+    end
+
+    for i in 1:length(item_bin)
+        for j in 1:length(item_bin[i])
+            item[i][j] = 1
+        end
+    end
+
+    bin = bin + nbbin
+
+
+    return bin, item
 end
