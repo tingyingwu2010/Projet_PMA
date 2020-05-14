@@ -46,7 +46,7 @@ function newbin_process(numitem,weight,new_index,cond)
         for j in 1:nbbin
             if(weight[i]+weight_bin[j]<1)
                 for p in bin_item[j]
-                    if(!(i,p,0) in cond & !(p,i,0) in cond)
+                    if(!((i,p,0) in cond) & !((p,i,0) in cond))
                         Possible = true
                     end
                 end
