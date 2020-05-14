@@ -2,7 +2,7 @@ function newbin_process(numitem,weight,new_index,cond)
     numitem = trunc(Int,numitem)
     index = []
 
-    nbbin = 1
+    nbbin = 0
 
     bin_item = Array{Array}(undef, numitem)
     for j in 1 : numitem
@@ -14,16 +14,17 @@ function newbin_process(numitem,weight,new_index,cond)
     for (i,j,k) in cond
         if(i in new_index & j in new_index)
             if((k == 1) & !(i in index) & !(j in index))
+                nbbin = nbbin + 1
                 push!(bin_item[nbbin], i ,j)
                 weight_bin[nbbin] = weight[i] + weight[j]
                 push!(index,i,j)
-                nbbin = nbbin + 1
             elseif((k == 1) & (i in index))
                 for p in 1:nbbin
                     if(i in bin_item[p])
                         push!(bin_item[p],j)
                         weight_bin[p] = weight_bin[p] + weight_bin[j]
                         push!(index,j)
+                        break
                     end
                 end
             elseif(k == 1 & (j in index))
@@ -32,6 +33,7 @@ function newbin_process(numitem,weight,new_index,cond)
                         push!(bin_item[p],j)
                         weight_bin[p] = weight_bin[p] + weight_bin[i]
                         push!(index,i)
+                        break
                     end
                 end
             end
