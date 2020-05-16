@@ -24,10 +24,10 @@ function Heuristic_sub(capacity, numitem, weight, pi, cond)
 
 
     # fix the value of the first row and first column to 0
-    for col in 0:capacity+1)
+    for col in 0:capacity+1
         V[1][col] = 0;
     end
-    for row in 0:numitem+1)
+    for row in 0:numitem+1
         V[row][1] = 0;
     end
 
@@ -64,3 +64,4 @@ function Heuristic_sub(capacity, numitem, weight, pi, cond)
 
 
     return sol, objective;
+end

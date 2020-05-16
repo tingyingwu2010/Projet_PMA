@@ -1,16 +1,14 @@
-function bap2(capacity,numitem,weight)
+function bap1(capacity,numitem,weight)
     # initialization
     # an optimal sulotion can not be smaller than the round up value of average weight
     theory = cld(sum(weight), 1)
-    epsilon = 0.001
+    epsilon = 0.05
     pattern_pool=Array{Array}(undef,0)
     # This function gives a feasible solution by 2-approximation method
     upper, items = Initialisation(numitem,weight)
     # add inital patterns to pattern pool
     for i in vec(items)
         sum_weight = i*weight
-        println(i)
-        println(size(i))
         push!(pattern_pool, reshape(i, (numitem,)))
     end
 
@@ -33,25 +31,19 @@ function bap2(capacity,numitem,weight)
     while length(branch_condition_tree)!=0
         println("------------round ", ii, "-------------")
         println("length tree", length(branch_condition_tree))
-        # branching constraint in current node
+        # branching constraint in current node (DFS)
         constraints = branch_condition_tree[length(branch_condition_tree)]
         deleteat!(branch_condition_tree,length(branch_condition_tree))
         # constraints = branch_condition_tree[1]
         # deleteat!(branch_condition_tree,1)
-        println("length before filtration ", length(pattern_pool))
-        columns = filtration(constraints, pattern_pool)
-        println("length after filtration ", length(columns))
-        #println("constraint: ", constraints)
-        #println("columns   ", columns)
+        columns = copy(pattern_pool)
         lower = -1000
         # solution of master problem
         alpha = Array{Any, 1}(undef,0)
         nbit = 1
         feasibility = true
         while nbit<1000
-            alpha, master, cons, feasibility= RDWLP(columns, numitem)
-            println("length columns_cc   ", length(columns))
-            println("length alpha_cc   ", length(alpha))
+            alpha, master, cons, cons2, feasibility= RDWLP1(columns, numitem, constraints)
             if !feasibility
                 break
             end
@@ -71,9 +63,8 @@ function bap2(capacity,numitem,weight)
                 end
             end
             d = JuMP.dual.(cons)
-            # dynamic programming on pricing problem
-            # aa, bb = Heuristic_sub(capacity, numitem, weight, d, constraints)
-            y, sp_obj = pricing(d, numitem, weight, constraints)
+            mu = JuMP.dual.(cons2)
+            y, sp_obj = pricing1(d, mu, numitem, weight, constraints)
             # calculate lower bound
             lower =sum(d)+sp_obj
             println("reduced cost: ", sp_obj)
@@ -87,7 +78,6 @@ function bap2(capacity,numitem,weight)
             end
             nbit+=1
             sum_weight = sum(y[k]*weight[k] for k in 1:numitem)
-
             push!(columns, y)
             # we only add high quality parttens (total weight > 0.5)to the pattern pool
             if sum_weight>0.5
@@ -151,53 +141,4 @@ function isInteger(alpha)
         end
     end
     return flag
-end
-
-# the function search the item i,j that we branch on
-# pick up the fractional items that have largest total weight
-function search_fraction(fraction_pattern, numitem, alpha, cons)
-    for i in numitem:-1:2
-        for j in (i-1):-1:1
-            w=0
-            for a in 1:length(alpha)
-                if fraction_pattern[a][i]==1 && fraction_pattern[a][j]==1
-                    w = w + alpha[a]
-                end
-            end
-            if w<1 && w>0
-                if !((i,j,0) in cons) && !((i,j,1) in cons)
-                    return i, j
-                end
-            end
-        end
-    end
-end
-
-# filtration of patterns in pattern pool
-function filtration(cons, columns)
-    col_filt = copy(columns)
-    ind = []
-    for (i,j,type) in cons
-        # filtration of up branch
-        if type == 1
-            for k in 1:length(col_filt)
-                if col_filt[k][i] == 1 && col_filt[k][j] == 0
-                    push!(ind,k)
-                end
-                if col_filt[k][i] == 0 && col_filt[k][j] == 1
-                    push!(ind,k)
-                end
-            end
-
-        # filtration of down branch
-        else
-            for k in 1:length(col_filt)
-                if col_filt[k][i] == 1 && col_filt[k][j] == 1
-                    push!(ind,k)
-                end
-            end
-        end
-    end
-    deleteat!(col_filt, sort(unique(ind)))
-    return col_filt
 end
