@@ -34,6 +34,7 @@ function Heuristic_sub(capacity, numitem, weight, pi, cond)
     # consider every item
     for item in 2:numitem+1
         for w in 2:capacity+1
+            push!(Bin_item[i][j],Bin_item[item-1][w-weight[item-1]])
             if (weight[item-1] <= w)
                 # pack the current item in the bin
                 # if the value of the weight without current item + the value of current item > current value
@@ -51,14 +52,12 @@ function Heuristic_sub(capacity, numitem, weight, pi, cond)
     end
 
     # findmax retruns 2 things: [1] = maximum value, [2] = the location of the maximum value
-    row_num = findmax(V)[2]
-    col_num = findmax(findmax(V)[1])[2]
 
-    items = Bin_item[row_num][col_num]
 
-    objective = findmax(findmax(V)[1])[1]
+    items = Bin_item[numitem+1][capacity+1]
+    objective = V[numitem+1][capacity+1]
+
     sol = zeros(1, numitem)
-
     for j in items
         sol[j] = 1
     end
