@@ -50,12 +50,13 @@ function Heuristic_sub(capacity, numitem, weight, pi, cond)
         end
     end
 
+    # findmax retruns 2 things: [1] = maximum value, [2] = the location of the maximum value
     row_num = findmax(V)[2]
-    col_num = findmax(findmax(V)[1])
+    col_num = findmax(findmax(V)[1])[2]
 
     items = Bin_item[row_num][col_num]
 
-    objective = (findmax(findmax(V)[1])[1])/capacity
+    objective = findmax(findmax(V)[1])[1]
     sol = zeros(1, numitem)
 
     for j in items
