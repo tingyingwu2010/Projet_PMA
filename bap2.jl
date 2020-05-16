@@ -6,14 +6,12 @@ function bap2(capacity,numitem,weight)
     pattern_pool=Array{Array}(undef,0)
     # This function gives a feasible solution by 2-approximation method
     upper, items = Initialisation(capacity,numitem,weight)
+    # add inital patterns to pattern pool
     for i in vec(items)
         sum_weight = i*weight
-        # for k in length(weight)
-        #     sum_weight = i[k]*weight[k] + sum_weight
-        #     println(sum_weight)
-        # end
         push!(pattern_pool, reshape(i, (numitem,)))
     end
+
     # print(pattern_pool)
     # start with the columns that each item in a bin
     # for i in 1:numitem
@@ -25,14 +23,13 @@ function bap2(capacity,numitem,weight)
     lower = -1000
     alpha_opt = items
     ii = 1
-    # column_tree=Array{Array{Array}}(undef,0)
-    # push!(column_tree,pattern_pool)
+    # we
     branch_condition_tree= Array{Array}(undef,0)
     push!(branch_condition_tree, [])
+
     while length(branch_condition_tree)!=0
         println("------------round ", ii, "-------------")
-        # columns = column_tree[length(columns)]
-        # deleteat!(column_tree,length(column_tree))
+
         # println(branch_condition_tree)
         println("length tree", length(branch_condition_tree))
         constraints = branch_condition_tree[length(branch_condition_tree)]
