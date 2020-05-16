@@ -1,4 +1,5 @@
-function Preprocess(numitem, weight)
+function Preprocess(numitem, weight_new)
+    weight = copy(weight_new)
     numitem = trunc(Int,numitem)
     num_bin_1 = 0
     num_bin_2 = 0
