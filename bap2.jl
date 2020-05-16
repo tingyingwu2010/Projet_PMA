@@ -19,19 +19,19 @@ function bap2(capacity,numitem,weight)
     #     a[i] = 1
     #     push!(pattern_pool, a)
     # end
+
     println(upper)
     lower = -1000
     alpha_opt = items
     ii = 1
-    # we
+    # we store the branch constraint in branch_condition_tree
     branch_condition_tree= Array{Array}(undef,0)
     push!(branch_condition_tree, [])
-
+    # node processing
     while length(branch_condition_tree)!=0
         println("------------round ", ii, "-------------")
-
-        # println(branch_condition_tree)
         println("length tree", length(branch_condition_tree))
+        # branching constraint in current node
         constraints = branch_condition_tree[length(branch_condition_tree)]
         deleteat!(branch_condition_tree,length(branch_condition_tree))
         # constraints = branch_condition_tree[1]
@@ -42,20 +42,19 @@ function bap2(capacity,numitem,weight)
         #println("constraint: ", constraints)
         #println("columns   ", columns)
         lower = -1000
+        # solution of master problem
         alpha = Array{Any, 1}(undef,0)
         nbit = 1
         feasibility = true
         while nbit<1000
             alpha, master, cons, feasibility= RDWLP(columns, numitem)
-
             println("length columns_cc   ", length(columns))
             println("length alpha_cc   ", length(alpha))
-            # println("alpha", alpha)
-            #update upperbound
             if !feasibility
                 break
             end
             print("master value:", objective_value.(master))
+            # if the master problem is integer we, try to update upperbound
             if isInteger(alpha)
                 ss = objective_value.(master)
                 if ss<upper
@@ -70,29 +69,32 @@ function bap2(capacity,numitem,weight)
                 end
             end
             d = JuMP.dual.(cons)
-            aa, bb = Heuristic_sub(capacity, numitem, weight, d, constraints)
+            # dynamic programming on pricing problem
+            # aa, bb = Heuristic_sub(capacity, numitem, weight, d, constraints)
             y, sp_obj = pricing(d, numitem, weight, constraints)
+            # calculate lower bound
             lower =sum(d)+sp_obj
-            println("dual: ", lower)
             println("reduced cost: ", sp_obj)
             #update lower bound
             if lower>=upper
                 break
             end
-            if sp_obj>-epsilon    #or dual > primal??? heuristic for master?
+            # if reduced cost is positive, break
+            if sp_obj>-epsilon
                 break
             end
             nbit+=1
             sum_weight = sum(y[k]*weight[k] for k in 1:numitem)
-            #println("add column", y)
+
             push!(columns, y)
+            # we only add high quality parttens (total weight > 0.5)to the pattern pool
             if sum_weight>0.5
                 push!(pattern_pool, y)
             end
 
         end
-
-
+        println("dual: ", lower)
+        # test the integrality and feasibility of master solution
         flag = !isInteger(alpha) && feasibility
         if flag
             heur_up, heur_item = SmallHeuristic(numitem, weight, alpha, columns, constraints)
@@ -105,9 +107,9 @@ function bap2(capacity,numitem,weight)
         println("upper bound: ", upper)
         println("length current pool ", length(columns))
 
-        # branch
+        # we branch only in the case that
         if upper>lower && flag
-            #detection of solutioon integrality and selection the fractional patterns
+            # detection of solutioon integerality and selection the fractional patterns
             fraction_pattern = Array{Array}(undef,0)
             fraction_alpha = []
             for a in 1:length(alpha)
@@ -116,16 +118,20 @@ function bap2(capacity,numitem,weight)
                     push!(fraction_alpha, alpha[a])
                 end
             end
+            # we chose the branch rule 2.1 in 
             i,j = search_fraction(fraction_pattern, numitem, fraction_alpha, constraints)
             println("find index i",i,", j: ",j)
+            # up branch (i,j together)
             constraint_up = copy(constraints)
             push!(constraint_up, (i,j,1))
+            # down branch (i,j seprate)
             constraint_down = copy(constraints)
             push!(constraint_down, (i,j,0))
             push!(branch_condition_tree, constraint_down)
             push!(branch_condition_tree, constraint_up)
         end
         ii = ii+1
+        # if the theorical optimal value is reached, we end the program
         if upper == theory
             break
         end
@@ -133,6 +139,7 @@ function bap2(capacity,numitem,weight)
     return alpha_opt, upper
 end
 
+# the function detects the integerality of an array
 function isInteger(alpha)
     flag = true
     for a in 1:length(alpha)
@@ -144,6 +151,7 @@ function isInteger(alpha)
     return flag
 end
 
+# the function search the item i,j that we branch on
 # pick up the fractional items that have largest total weight
 function search_fraction(fraction_pattern, numitem, alpha, cons)
     for i in numitem:-1:2
@@ -163,6 +171,7 @@ function search_fraction(fraction_pattern, numitem, alpha, cons)
     end
 end
 
+# filtration of patterns in pattern pool
 function filtration(cons, columns)
     col_filt = copy(columns)
     ind = []
