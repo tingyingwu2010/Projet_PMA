@@ -1,26 +1,28 @@
 function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
     numitem = trunc(Int, numitem)
 
-    p = 1
-    bin = 1
+    p = 0
+    bin = 0
     # The weight of each bin
     weight_bin = zeros(1, numitem)
     # initialization of item_bin
     # every bin have a vector of the number of items which are in the bin
     item_bin = Array{Array}(undef, numitem)
     # pattern that alpha is not integer
-    column = Array{Array}(undef, numitem)
+    column = Array{Array}(undef, length(alpha))
 
     for i in 1:length(alpha)
-        if(alpha[i] == 1)
+        if (alpha[i] == 1)
+            bin = bin + 1
             weight_bin[bin] = sum(weight.*column_pool[i])
             item_bin[bin] = findindex(column_pool[i], 1)
-            bin = bin + 1
         elseif(alpha[i] != 0)
-            column[p] = column_pool[i]
             p = p + 1
+            column[p] = column_pool[i]
         end
     end
+    column = column[1:p]
+
 
     weight_bin = weight_bin[1:bin]
     item_bin = item_bin[1:bin]
@@ -55,7 +57,7 @@ function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
 
     if nbbin == 0
         print("no possible result")
-        return 0, []
+        return 100000, []
     end
 
     item = Array{Array}(undef, (nbbin+bin))
@@ -75,6 +77,6 @@ function SmallHeuristic(numitem, weight, alpha, column_pool, cond)
 
     bin = bin + nbbin
 
-
+    println("bin heuristic", bin)
     return bin, item
 end

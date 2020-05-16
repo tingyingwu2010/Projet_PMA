@@ -1,4 +1,4 @@
-function Initialisation(capacity, numitem, weight)
+function Initialisation(numitem, weight)
     # A = Array{Array}(undef, 9)
     numitem = trunc(Int,numitem)
     # number of items
