@@ -1,6 +1,6 @@
 function orignal_formulation(weight)
     nb_item = length(weight)
-    bp=Model(with_optimizer(Gurobi.Optimizer,GUROBI_ENV, OutputFlag = 0, InfUnbdInfo = 0))
+    bp=Model(with_optimizer(Gurobi.Optimizer,GUROBI_ENV, OutputFlag = 1, InfUnbdInfo = 0))
     x=Array{Array{VariableRef,1},1}(undef,nb_item)
     for m in 1:nb_item
         x[m]=Array{VariableRef,1}(undef,nb_item)
@@ -21,5 +21,5 @@ function orignal_formulation(weight)
 
     @objective(bp, Min, sum(u))
     optimize!(bp)
-    return value.(x), objective_value.(bp)
+    print(objective_value(bp))
 end
