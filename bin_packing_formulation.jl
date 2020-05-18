@@ -18,7 +18,8 @@ function orignal_formulation(weight)
     for k in 1:nb_item
         @constraint(bp, sum(weight[i]*x[i][k] for i in 1:nb_item)- u[k] <=0)
     end
-    MOI.set(bp, MOI.RawParameter("TimeLimit"), 10.0);
+    # set a limit processing time to each node (300s)
+    MOI.set(bp, MOI.RawParameter("TimeLimit"), 300.0);
     @objective(bp, Min, sum(u))
     optimize!(bp)
     print(objective_value(bp))

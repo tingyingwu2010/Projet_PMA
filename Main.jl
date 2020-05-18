@@ -1,7 +1,7 @@
 using JuMP, Gurobi
 const GUROBI_ENV = Gurobi.Env()
 #You should change the path of instance
-path = "C:/Users/Think/Desktop/PMA/Falkenauer/Falkenauer U/Falkenauer_u120_04.txt"
+path = "C:/Users/Think/Desktop/PMA/Falkenauer/Falkenauer U/Falkenauer_u250_01.txt"
 capacity,numitem,weight = ReadDate(path)
 capacity=floor(Int, capacity)
 numitem = floor(Int, numitem)
