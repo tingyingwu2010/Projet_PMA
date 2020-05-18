@@ -1,4 +1,5 @@
 function findindex(A, num)
+    # find the index in array A correspond to num
     index = []
     for j in 1:length(A)
         if(A[j] == num)

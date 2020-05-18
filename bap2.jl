@@ -7,22 +7,12 @@ function bap2(capacity,numitem,weight)
     # This function gives a feasible solution by 2-approximation method
     upper, items = Initialisation(numitem,weight)
     # add inital patterns to pattern pool
+    nb_node = 1
     for i in vec(items)
         sum_weight = i*weight
-        println(i)
-        println(size(i))
         push!(pattern_pool, reshape(i, (numitem,)))
     end
 
-    # print(pattern_pool)
-    # start with the columns that each item in a bin
-    # for i in 1:numitem
-    #     a =  zeros(Int64, 1, numitem)
-    #     a[i] = 1
-    #     push!(pattern_pool, a)
-    # end
-
-    println(upper)
     lower = -1000
     alpha_opt = items
     ii = 1
@@ -32,15 +22,15 @@ function bap2(capacity,numitem,weight)
     # node processing
     while length(branch_condition_tree)!=0
         println("------------round ", ii, "-------------")
-        println("length tree", length(branch_condition_tree))
+        println("length of bap tree ", length(branch_condition_tree))
         # branching constraint in current node
         constraints = branch_condition_tree[length(branch_condition_tree)]
         deleteat!(branch_condition_tree,length(branch_condition_tree))
         # constraints = branch_condition_tree[1]
         # deleteat!(branch_condition_tree,1)
-        println("length before filtration ", length(pattern_pool))
+        println("amount of patterns before filtration ", length(pattern_pool))
         columns = filtration(constraints, pattern_pool)
-        println("length after filtration ", length(columns))
+        println("amount of patterns after filtration ", length(columns))
         #println("constraint: ", constraints)
         #println("columns   ", columns)
         lower = -1000
@@ -50,12 +40,12 @@ function bap2(capacity,numitem,weight)
         feasibility = true
         while nbit<1000
             alpha, master, cons, feasibility= RDWLP(columns, numitem)
-            println("length columns_cc   ", length(columns))
-            println("length alpha_cc   ", length(alpha))
+            # println("length columns_cc   ", length(columns))
+            # println("length alpha_cc   ", length(alpha))
             if !feasibility
                 break
             end
-            println("master value:", objective_value.(master))
+            # println("master value:", objective_value.(master))
             # if the master problem is integer we, try to update upperbound
             if isInteger(alpha)
                 ss = objective_value.(master)
@@ -76,7 +66,7 @@ function bap2(capacity,numitem,weight)
             y, sp_obj = pricing(d, numitem, weight, constraints)
             # calculate lower bound
             lower =sum(d)+sp_obj
-            println("reduced cost: ", sp_obj)
+            # println("reduced cost: ", sp_obj)
             #update lower bound
             if lower>=upper
                 break
@@ -107,7 +97,7 @@ function bap2(capacity,numitem,weight)
             end
         end
         println("upper bound: ", upper)
-        println("length current pool ", length(columns))
+        # println("length current pool ", length(columns))
 
         # we branch only in the case that
         if upper>lower && flag
@@ -118,11 +108,12 @@ function bap2(capacity,numitem,weight)
                 if alpha[a]<1 && alpha[a]>0
                     push!(fraction_pattern, columns[a])
                     push!(fraction_alpha, alpha[a])
+                    nb_node +=2
                 end
             end
             # we chose the branch rule 2.1 in
             i,j = search_fraction(fraction_pattern, numitem, fraction_alpha, constraints)
-            println("find index i",i,", j: ",j)
+            println("find branching index i: ",i,", j: ",j)
             # up branch (i,j together)
             constraint_up = copy(constraints)
             push!(constraint_up, (i,j,1))
@@ -138,7 +129,7 @@ function bap2(capacity,numitem,weight)
             break
         end
     end
-    return alpha_opt, upper
+    return alpha_opt, upper, nb_node
 end
 
 # the function detects the integerality of an array

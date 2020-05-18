@@ -1,6 +1,6 @@
 function pricing(pi, T, weight, constraint)
     # println("-------------solve SP-----------------")
-#T number of items
+    # T number of items
     price=Model(with_optimizer(Gurobi.Optimizer, GUROBI_ENV, OutputFlag = 0, InfUnbdInfo = 0))
 
     @variable(price,y[1:T] >= 0,  binary = true)
