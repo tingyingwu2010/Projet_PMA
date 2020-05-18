@@ -4,7 +4,7 @@ function newbin_process(numitem,weight,new_index,cond)
     numitem = trunc(Int,numitem)
     index = []
     # We must pack some pairs of items together
-    # nbbin = number of larger item generated according to the branch rules.
+    # nb_larger_item = number of larger item generated according to the branch rules.
     nb_larger_item = 0
     # initialization of the array indicating the items in each bin generated
     bin_item = Array{Array}(undef, numitem)
@@ -26,12 +26,12 @@ function newbin_process(numitem,weight,new_index,cond)
                 # use a new bin to pack item i and j
                 push!(bin_item[nb_larger_item], i ,j)
                 # update the weight of the new bin
-                weight_bin[nbbin] = weight[i] + weight[j]
+                weight_bin[nb_larger_item] = weight[i] + weight[j]
                 # indicate that we have already considered item i and j
                 push!(index,i,j)
             elseif ((k == 1) && (i in index))
                 # if i, j must be packed together and we have already packed item i
-                for p in 1:nbbin
+                for p in 1:nb_larger_item
                     if (i in bin_item[p])
                         # so we need to pack item j in the bin where there is item i
                         push!(bin_item[p],j)
@@ -43,7 +43,7 @@ function newbin_process(numitem,weight,new_index,cond)
                 end
             elseif (k == 1 & (j in index))
                 # if i, j must be packed together and we have already packed item j
-                for p in 1:nbbin
+                for p in 1:nb_larger_item
                     if (j in bin_item[p])
                         # so we need to pack item i in the bin where there is item j
                         push!(bin_item[p],i)
@@ -93,7 +93,7 @@ function newbin_process(numitem,weight,new_index,cond)
 
     # if according to some unreasonable branch rules,
     # there are bin with weight > capacity of each bin
-    for p in 1:nbbin
+    for p in 1:nb_larger_item
         if weight_bin[p] > 1
             print("no possible result")
             return 0, [], []
