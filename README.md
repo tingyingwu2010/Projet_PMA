@@ -10,4 +10,4 @@
 
 -Solver Gurobi
 
--heuristic finding feasible solution
+-Heuristic finding feasible solution
